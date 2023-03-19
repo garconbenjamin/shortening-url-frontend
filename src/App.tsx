@@ -1,10 +1,19 @@
-import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
-
+import React, { useState } from "react";
+import axios from "axios";
+import "./App.scss";
+import {
+  Container,
+  Row,
+  Card,
+  Input,
+  Button,
+  Col,
+  Text,
+} from "@nextui-org/react";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { NextUIProvider } from "@nextui-org/react";
+import ReactCardFlip from "react-card-flip";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,26 +31,69 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+const api = axios.create({
+  baseURL: "http://localhost:3000/api",
+  // timeout: 1000,
+  // headers: { "X-Custom-Header": "foobar" },
+});
 
 function App() {
+  const [url, setUrl] = useState("");
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [urlList, setUrlList] = useState([]);
+  const [shortenUrl, setShortenUrl] = useState("");
+  const submitURL = async () => {
+    const res = await api.post("url", { value: url });
+    setShortenUrl(res?.data?.uuid);
+    setIsFlipped(true);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <NextUIProvider>
+      <Container>
+        <Row align="center" justify="center">
+          <Col span={6}>
+            <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
+              <Card css={{ height: 250 }}>
+                <Card.Header>
+                  <Text b>Shorten URL</Text>
+                </Card.Header>
+                <Card.Body>
+                  <Input
+                    value={url}
+                    label="Enter a long URL to make a shorten URL"
+                    onChange={(e) => setUrl(e.target.value)}
+                  />
+                </Card.Body>
+                <Card.Footer>
+                  <Button onPress={submitURL}>Create shorten URL</Button>
+                </Card.Footer>
+              </Card>
+
+              <Card css={{ height: 250 }}>
+                <Card.Header>
+                  <Text b>Magic! Enjoy your new URL</Text>
+                </Card.Header>
+
+                <Card.Body>
+                  <Input value={shortenUrl} labelRight={<Text>copy</Text>} />
+                </Card.Body>
+
+                <Card.Footer>
+                  <Button
+                    onPress={() => {
+                      setIsFlipped(!isFlipped);
+                    }}
+                  >
+                    Go back
+                  </Button>
+                </Card.Footer>
+              </Card>
+            </ReactCardFlip>
+          </Col>
+        </Row>
+      </Container>
+    </NextUIProvider>
   );
 }
 
