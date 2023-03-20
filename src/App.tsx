@@ -9,6 +9,7 @@ import {
   Button,
   Col,
   Text,
+  Loading,
 } from "@nextui-org/react";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -37,26 +38,33 @@ const api = axios.create({
   // timeout: 1000,
   // headers: { "X-Custom-Header": "foobar" },
 });
-
+const baseUrl = "http://localhost:3000/p/";
 function App() {
   const [url, setUrl] = useState("");
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [urlList, setUrlList] = useState([]);
   const [shortenUrl, setShortenUrl] = useState("");
   const submitURL = async () => {
+    setIsLoading(true);
     const res = await api.post("url", { value: url });
-    setShortenUrl(res?.data?.uuid);
-    setIsFlipped(true);
+    const { uuid } = res?.data;
+    if (uuid) {
+      setShortenUrl(baseUrl + uuid);
+      setIsFlipped(true);
+    }
+
+    setIsLoading(false);
   };
   return (
     <NextUIProvider>
-      <Container>
+      <Container xs css={{ maxWidth: 500, marginTop: 50 }}>
         <Row align="center" justify="center">
-          <Col span={6}>
+          <Col>
             <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
-              <Card css={{ height: 250 }}>
+              <Card css={{ mw: 600 }}>
                 <Card.Header>
-                  <Text b>Shorten URL</Text>
+                  <Text h1>Shorten URL</Text>
                 </Card.Header>
                 <Card.Body>
                   <Input
@@ -64,9 +72,14 @@ function App() {
                     label="Enter a long URL to make a shorten URL"
                     onChange={(e) => setUrl(e.target.value)}
                   />
+                  {isLoading && (
+                    <Loading size="sm" type="points" color="secondary" />
+                  )}
                 </Card.Body>
-                <Card.Footer>
-                  <Button onPress={submitURL}>Create shorten URL</Button>
+                <Card.Footer css={{ justifyContent: "center" }}>
+                  <Button color="gradient" onPress={submitURL}>
+                    Create shorten URL
+                  </Button>
                 </Card.Footer>
               </Card>
 
@@ -76,16 +89,32 @@ function App() {
                 </Card.Header>
 
                 <Card.Body>
-                  <Input value={shortenUrl} labelRight={<Text>copy</Text>} />
+                  <Input
+                    aria-label="copy-url"
+                    value={shortenUrl}
+                    readOnly
+                    contentRightStyling={false}
+                    contentRight={
+                      <Button
+                        auto
+                        onClick={() => {
+                          navigator.clipboard.writeText(shortenUrl);
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    }
+                  />
                 </Card.Body>
 
-                <Card.Footer>
+                <Card.Footer css={{ justifyContent: "center" }}>
                   <Button
                     onPress={() => {
                       setIsFlipped(!isFlipped);
                     }}
+                    color="success"
                   >
-                    Go back
+                    Create another one
                   </Button>
                 </Card.Footer>
               </Card>
