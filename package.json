@@ -24,7 +24,8 @@
   },
   "scripts": {
     "start": "PORT=5000 react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "deploy":"firebase deploy --only hosting"
   },
   "eslintConfig": {
     "extends": [
