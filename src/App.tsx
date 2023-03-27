@@ -14,6 +14,7 @@ import {
 } from "@nextui-org/react";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
+import { BACKEND_URL } from "./config";
 
 import ReactCardFlip from "react-card-flip";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -35,11 +36,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
-  // timeout: 1000,
-  // headers: { "X-Custom-Header": "foobar" },
+  baseURL: `${BACKEND_URL}/api`,
 });
-const baseUrl = "http://localhost:3000/p/";
+const baseUrl = `${BACKEND_URL}/p`;
+
 function App() {
   const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
