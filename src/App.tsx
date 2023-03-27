@@ -3,6 +3,7 @@ import axios from "axios";
 import "./App.scss";
 import {
   Container,
+  NextUIProvider,
   Row,
   Card,
   Input,
@@ -13,7 +14,7 @@ import {
 } from "@nextui-org/react";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { NextUIProvider } from "@nextui-org/react";
+
 import ReactCardFlip from "react-card-flip";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -41,20 +42,26 @@ const api = axios.create({
 const baseUrl = "http://localhost:3000/p/";
 function App() {
   const [url, setUrl] = useState("");
+  const [message, setMessage] = useState("");
   const [isFlipped, setIsFlipped] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [urlList, setUrlList] = useState([]);
   const [shortenUrl, setShortenUrl] = useState("");
   const submitURL = async () => {
-    setIsLoading(true);
-    const res = await api.post("url", { value: url });
-    const { uuid } = res?.data;
-    if (uuid) {
-      setShortenUrl(baseUrl + uuid);
-      setIsFlipped(true);
-    }
+    if (url) {
+      setIsLoading(true);
+      try {
+        const res = await api.post("url", { value: url });
+        const { uuid } = res?.data;
+        if (uuid) {
+          setShortenUrl(baseUrl + uuid);
+          setIsFlipped(true);
+        }
+      } catch (err: any) {
+        setMessage(err.message);
+      }
 
-    setIsLoading(false);
+      setIsLoading(false);
+    }
   };
   return (
     <NextUIProvider>
@@ -71,6 +78,7 @@ function App() {
                     value={url}
                     label="Enter a long URL to make a shorten URL"
                     onChange={(e) => setUrl(e.target.value)}
+                    helperText={message}
                   />
                   {isLoading && (
                     <Loading size="sm" type="points" color="secondary" />
